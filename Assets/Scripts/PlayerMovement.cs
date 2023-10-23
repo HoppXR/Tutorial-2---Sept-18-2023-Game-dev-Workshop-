@@ -11,7 +11,6 @@ public class PlayerMovement : MonoBehaviour
     public float _speed;
 
     [SerializeField] private Board _board = new Board();
-
     [SerializeField] private Text _text;
 
     Vector2 _currentPos;
@@ -84,8 +83,26 @@ public class PlayerMovement : MonoBehaviour
                 UpdatePosition();
             }
 
-            if (_tileMovementAmount == 0 && !_isMoving)
+            for (int i = 0; i < _board.GetSnakes().Count; i++)
             {
+                if (_tileMovementAmount == 0 && _players[_currentPlayer].GetCurrentTile() == _board.GetSnakes()[i].GetHeadTile())
+                {
+                    _tileMovementAmount = 1;
+                    MoveDownSnake(i);
+                }
+            }
+
+            for (int i = 0; i < _board.GetLadders().Count; i++)
+            {
+                if (_tileMovementAmount == 0 && _players[_currentPlayer].GetCurrentTile() == _board.GetLadders()[i].GetBottomTile())
+                {
+                    _tileMovementAmount = 1;
+                    ClimbLadder(i);
+                }
+            }
+
+            if (_tileMovementAmount == 0 && !_isMoving)
+            {   
                 _text.text = "Press 'space' to roll the dice";
 
                 if (_turnStarted)
@@ -129,5 +146,15 @@ public class PlayerMovement : MonoBehaviour
         _totalTime = (_nextPos - _currentPos / _speed).magnitude;
         _isMoving = true;
         _players[_currentPlayer].SetCurrentTile(_players[_currentPlayer].GetCurrentTile() + 1);
+    }
+
+    void MoveDownSnake(int slot)
+    {
+        _players[_currentPlayer].SetCurrentTile(_board.GetSnakes() [slot].GetTailTile() - 1);
+    }
+
+    void ClimbLadder (int slot)
+    {
+        _players[_currentPlayer].SetCurrentTile(_board.GetLadders() [slot].GetTopTile() - 1);
     }
 }
